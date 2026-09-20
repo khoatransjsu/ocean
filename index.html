@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#01060f">
+<title>Anniversary</title>
+<style>
+/* ============================================================
+   THE DEEP — a descent
+   Palette: sunlit teal → twilight blue → midnight → abyss
+   One warm accent in the entire piece: the anglerfish lure.
+   ============================================================ */
+:root{
+  --abyss:#01060f;
+  --ink:#dff5f2;
+  --ink-dim:#7fa6ad;
+  --biolume:#7ef9e0;
+  --lure:#ffb36b;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  background:var(--abyss); color:var(--ink);
+  font-family:var(--serif);
+  overflow:hidden; overscroll-behavior:none;
+  touch-action:none;
+}
+canvas#stage{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:none}
+body.coarse canvas#stage{cursor:auto}
+
+/* subtle water grain over everything */
+.grain{
+  position:fixed;inset:-50%;pointer-events:none;z-index:3;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainshift 7s steps(6) infinite;
+}
+@keyframes grainshift{
+  0%{transform:translate(0,0)}16%{transform:translate(-3%,2%)}33%{transform:translate(2%,-3%)}
+  50%{transform:translate(-2%,-2%)}66%{transform:translate(3%,1%)}83%{transform:translate(1%,3%)}100%{transform:translate(0,0)}
+}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 90% at 50% 45%,transparent 40%,rgba(0,3,8,.55) 100%)}
+
+/* ---------- the gate ---------- */
+.gate{
+  position:fixed;inset:0;z-index:20;display:grid;place-items:center;
+  background:radial-gradient(90% 70% at 50% 55%,rgba(3,20,30,.84) 0%,rgba(1,6,15,.97) 72%);
+  transition:opacity 1.6s ease, visibility 1.6s;
+  padding:8vh 6vw;
+}
+.gate.gone{opacity:0;visibility:hidden}
+.gate-in{max-width:34rem;text-align:center}
+.gate h1{
+  font-size:clamp(2.6rem,9vw,5.2rem); font-weight:400; line-height:1;
+  margin:0 0 1.4rem; letter-spacing:.06em; color:var(--ink);
+  text-shadow:0 0 42px rgba(126,249,224,.32);
+}
+.gate p{
+  font-size:clamp(1rem,2.4vw,1.22rem); line-height:1.7; color:var(--ink-dim);
+  margin:0 auto 2.6rem; max-width:30rem;
+}
+.dive{
+  font-family:var(--serif); font-size:1.05rem; letter-spacing:.14em;
+  color:var(--ink); background:transparent; cursor:pointer;
+  border:1px solid rgba(126,249,224,.35); border-radius:999px;
+  padding:.95rem 2.6rem; transition:border-color .5s, box-shadow .5s, color .5s;
+}
+.dive:hover,.dive:focus-visible{border-color:rgba(126,249,224,.9);box-shadow:0 0 34px rgba(126,249,224,.22);color:#fff}
+.gate .fine{margin-top:2.4rem;font-size:.82rem;letter-spacing:.05em;color:#41666e}
+
+/* ---------- field notes ---------- */
+.note{
+  position:fixed;z-index:6;left:clamp(1.4rem,6vw,5rem);top:50%;transform:translateY(-50%);
+  max-width:min(26rem,60vw);pointer-events:none;
+  opacity:0;transition:opacity 2s ease;
+}
+.note.show{opacity:1}
+.note .depth{
+  font-size:.86rem;letter-spacing:.22em;color:var(--biolume);opacity:.72;margin:0 0 .9rem;
+}
+.note p{
+  margin:0;font-size:clamp(1.15rem,2.7vw,1.6rem);line-height:1.62;
+  color:var(--ink);text-shadow:0 2px 26px rgba(0,10,20,.9);
+}
+
+/* ---------- letter at the floor ---------- */
+.letter{
+  position:fixed;inset:0;z-index:12;display:grid;place-items:center;
+  padding:10vh 7vw;opacity:0;visibility:hidden;transition:opacity 3s ease,visibility 3s;
+  background:radial-gradient(92% 78% at 50% 70%,rgba(2,14,20,.44) 0%,rgba(1,6,15,.9) 58%);
+}
+.letter.show{opacity:1;visibility:visible}
+.letter-in{max-width:36rem;text-align:center;margin-top:clamp(3vh,11vh,96px)}
+.letter .line{
+  font-size:clamp(1.15rem,3vw,1.7rem);line-height:1.75;margin:0 0 1.5rem;
+  opacity:0;transform:translateY(10px);transition:opacity 2.2s ease,transform 2.2s ease;
+}
+.letter .line.in{opacity:1;transform:none}
+.letter .sign{
+  margin-top:2.6rem;font-size:1rem;letter-spacing:.2em;color:var(--biolume);opacity:0;
+  transition:opacity 2.4s ease;
+}
+.letter .sign.in{opacity:.85}
+.again{
+  margin-top:3rem;font-family:var(--serif);font-size:.95rem;letter-spacing:.14em;
+  background:transparent;color:var(--ink-dim);border:1px solid rgba(126,249,224,.25);
+  border-radius:999px;padding:.75rem 2rem;cursor:pointer;opacity:0;transition:opacity 2s ease,color .4s,border-color .4s;
+}
+.again.in{opacity:1}
+.again:hover,.again:focus-visible{color:var(--ink);border-color:rgba(126,249,224,.7)}
+
+/* ---------- controls ---------- */
+.hud{position:fixed;z-index:8;top:1.5rem;right:1.5rem;display:flex;gap:.6rem}
+.hud button{
+  width:2.6rem;height:2.6rem;display:grid;place-items:center;cursor:pointer;
+  background:rgba(3,20,28,.4);border:1px solid rgba(126,249,224,.18);border-radius:50%;
+  color:var(--ink-dim);transition:color .4s,border-color .4s,background .4s;backdrop-filter:blur(6px);
+}
+.hud button:hover,.hud button:focus-visible{color:var(--biolume);border-color:rgba(126,249,224,.55);background:rgba(6,34,46,.55)}
+.hud svg{width:1.05rem;height:1.05rem;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hud button.off .on-only{display:none}
+.hud button:not(.off) .off-only{display:none}
+
+.tip{
+  position:fixed;z-index:7;bottom:2rem;left:50%;transform:translateX(-50%);
+  font-size:.82rem;letter-spacing:.16em;color:rgba(190,225,228,.6);pointer-events:none;
+  text-shadow:0 1px 14px rgba(0,12,20,.9);
+  opacity:0;transition:opacity 1.6s ease;text-align:center;white-space:nowrap;
+}
+.tip.show{opacity:1}
+
+:focus-visible{outline:1px solid rgba(126,249,224,.8);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){ .grain{animation:none} }
+@media (max-width:560px){
+  .note{left:1.4rem;right:1.4rem;max-width:none;top:auto;bottom:6.5rem;transform:none}
+}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<div class="note" id="note" aria-live="polite">
+  <p class="depth" id="noteDepth"></p>
+  <p id="noteText"></p>
+</div>
+
+<div class="hud">
+  <button id="soundBtn" class="off" aria-label="Sound">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 9v6h4l5 4V5L8 9H4z"/>
+      <path class="on-only" d="M16.5 8.5a5 5 0 0 1 0 7"/>
+      <path class="on-only" d="M19 6a8.5 8.5 0 0 1 0 12"/>
+      <path class="off-only" d="M17 9.5l4 5M21 9.5l-4 5"/>
+    </svg>
+  </button>
+  <button id="fsBtn" aria-label="Full screen">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+    </svg>
+  </button>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<div class="letter" id="letter">
+  <div class="letter-in" id="letterIn"></div>
+</div>
+
+<div class="gate" id="gate">
+  <div class="gate-in">
+    <h1 id="gateName"></h1>
+    <p id="gateLine"></p>
+    <button class="dive" id="diveBtn">Bắt đầu lặn nào</button>
+    <p class="fine">Cuộn hoặc kéo để chìm nhanh hơn.</p>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ==================================================================
+   ✦✦✦  EDIT THIS BLOCK — everything personal lives here  ✦✦✦
+   Vietnamese accents work fine (Ánh, Hương, Ngọc…).
+   ================================================================== */
+const CFG = {
+  // Her name. Shown on the opening screen, and written in living
+  // plankton on the sea floor at the very end.
+  name: "Happy Anniversary",
+
+  // The line under her name on the opening screen.
+  openingLine: "Có những điều dễ nói hơn khi ở độ sâu 3.800 mét – nơi bóng tối và sự tĩnh lặng bao trùm, và chẳng có gì phải vội vã.",
+
+  // Field notes. They surface as you pass each depth.
+  // Depth is in metres, 0 → 3800. Keep each one short.
+  notes: [
+    { m: 40,   text: "Ánh sáng vẫn vươn tới nơi này. Đây là nơi chúng ta bắt đầu — mọi thứ đều rạng rỡ, mọi thứ đều nhẹ nhàng." },
+    { m: 260,  text: "Màu sắc đầu tiên mà đại dương đánh mất là màu đỏ. Còn em thì chưa bao giờ đánh mất màu sắc của mình." },
+    { m: 620,  text: "Dưới vạch này, không gì sinh sôi nhờ ánh sáng mặt trời. Mọi thứ học cách tự tạo ra nguồn sống cho riêng mình." },
+    { m: 1050, text: "Chúng ta cũng vậy. Em vẫn luôn tìm thấy niềm vui từ những điều tưởng chừng chẳng có gì." },
+    { m: 1600, text: "Loài cá voi cất tiếng hát ở dưới này vì âm thanh truyền đi xa hơn tầm nhìn." },
+    { m: 2250, text: "Áp suất ở độ sâu này sẽ nghiền nát hầu hết mọi thứ. Một số sinh vật sinh ra là để chịu đựng điều đó. Và em cũng vậy." },
+    { m: 2900, text: "Bây giờ đã không còn ánh sáng. Anh vẫn biết chính xác em đang ở đâu." },
+    { m: 3450, text: "Sắp đến đáy rồi. Cố lên." }
+  ],
+
+  // The letter on the sea floor. One line per line.
+  letter: [
+    "Chín mươi lăm phần trăm đại dương này chưa từng được bất kỳ ai nhìn thấy.",
+    "Anh nghĩ tình yêu cũng vận hành theo cách đó — phần lớn nó diễn ra trong lặng lẽ, nơi chẳng có ai chứng kiến.",
+    "Cảm ơn em vì mỗi ngày bình thường, giản đơn và chẳng ai hay biết..",
+    "Chúng là thứ tuyệt vời nhất mà anh có."
+  ],
+  signature: "— Khoa",
+
+  // Button at the very end.
+  againLabel: "Lặn lên lại nha",
+
+  // ---------------- the music ----------------
+  // Put your audio file next to this index.html (or in a folder beside
+  // it) and write the path here. Relative paths only — no leading "/"
+  // and no "C:\..." — so it keeps working wherever you move the folder.
+  //     "our-song.mp3"   ·   "audio/our-song.m4a"   ·   "music/ocean.ogg"
+  // Set file to "" to go back to the synthesised ocean drone.
+  music: {
+    file:   "./music.m4a",
+    volume: 0.7,     // 0 → 1
+    loop:   true,
+    muffle: true,    // the track muffles as you sink, like real water
+
+    // The piece also synthesises sound of its own on top of the track:
+    // whale calls between 700-3300m, bubbles near the surface, a pitched
+    // chime each time a note surfaces, and a five-note arpeggio when the
+    // letter appears at the bottom. false = your track and nothing else.
+    keepEffects: false
+  }
+};
+/* ================= end of the personal block ================= */
+
+
+/* ---------------------------------------------------------------- */
+/* utilities                                                        */
+/* ---------------------------------------------------------------- */
+const TAU = Math.PI * 2;
+const rand = (a = 1, b = 0) => b + Math.random() * (a - b);
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, dt, rate) => a + (b - a) * (1 - Math.exp(-rate * dt));
+function gauss() {
+  let u = 0, v = 0;
+  while (!u) u = Math.random();
+  while (!v) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(TAU * v);
+}
+const SERIF = '"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif';
+
+/* sample a string into a cloud of points centred on (0,0) */
+function sampleText(text, fontPx, maxPts, weight) {
+  const w8 = weight || '400';
+  const pad = 30;
+  const meas = document.createElement('canvas').getContext('2d');
+  meas.font = w8 + ' ' + fontPx + 'px ' + SERIF;
+  const w = Math.max(8, Math.ceil(meas.measureText(text).width) + pad * 2);
+  const h = Math.ceil(fontPx * 1.7);
+  const off = document.createElement('canvas');
+  off.width = w; off.height = h;
+  const c = off.getContext('2d');
+  c.font = w8 + ' ' + fontPx + 'px ' + SERIF;
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(text, w / 2, h / 2);
+  const d = c.getImageData(0, 0, w, h).data;
+  let pts = [];
+  for (let gap = 3; gap <= 16; gap++) {
+    pts = [];
+    for (let y = 0; y < h; y += gap) {
+      for (let x = 0; x < w; x += gap) {
+        if (d[(y * w + x) * 4 + 3] > 130) pts.push({ x: x - w / 2, y: y - h / 2 });
+      }
+    }
+    if (pts.length <= maxPts) break;
+  }
+  return pts;
+}
+
+/* ---------------------------------------------------------------- */
+/* canvas + glow buffer                                             */
+/* ---------------------------------------------------------------- */
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d', { alpha: false });
+const fxc = document.createElement('canvas');
+const fx = fxc.getContext('2d');
+
+let W = 0, H = 0, DPR = 1, Q = 1;
+const coarse = matchMedia('(pointer: coarse)').matches;
+const lowMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (coarse) document.body.classList.add('coarse');
+
+let GLOW = null;
+function buildGlow() {
+  const s = 96;
+  const g2 = document.createElement('canvas');
+  g2.width = g2.height = s;
+  const q = g2.getContext('2d');
+  const gr = q.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  gr.addColorStop(0, 'rgba(190,255,242,1)');
+  gr.addColorStop(.22, 'rgba(120,240,225,.30)');
+  gr.addColorStop(1, 'rgba(80,220,210,0)');
+  q.fillStyle = gr;
+  q.fillRect(0, 0, s, s);
+  GLOW = g2;
+}
+buildGlow();
+
+let RAY = null;
+function buildRay() {
+  const w = 96, h = 420;
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const q = cv.getContext('2d');
+  for (let y = 0; y < h; y++) {
+    const v = Math.pow(1 - y / h, 2.1);
+    const g = q.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, 'rgba(158,247,238,0)');
+    g.addColorStop(.5, 'rgba(186,252,244,' + v.toFixed(4) + ')');
+    g.addColorStop(1, 'rgba(158,247,238,0)');
+    q.fillStyle = g;
+    q.fillRect(0, y, w, 1);
+  }
+  RAY = cv;
+}
+buildRay();
+
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  DPR = Math.min(window.devicePixelRatio || 1, coarse ? 2 : 1.75);
+  canvas.width = Math.floor(W * DPR); canvas.height = Math.floor(H * DPR);
+  fxc.width = canvas.width; fxc.height = canvas.height;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  fx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  Q = clamp((W * H) / (1500 * 900), 0.4, 1) * (coarse ? 0.55 : 1);
+  if (lowMotion) Q *= 0.7;
+  World.rebuild();
+}
+window.addEventListener('resize', resize);
+
+/* ---------------------------------------------------------------- */
+/* input                                                            */
+/* ---------------------------------------------------------------- */
+const P = { x: 0, y: 0, sx: 0, sy: 0, down: false, has: false, lastY: 0 };
+function setPointer(e) {
+  P.x = e.clientX; P.y = e.clientY; P.has = true;
+}
+canvas.addEventListener('pointermove', e => {
+  if (P.down && !coarse) { /* drag handled below */ }
+  setPointer(e);
+  if (P.down) {
+    const dy = e.clientY - P.lastY;
+    World.vel -= dy / World.MPX * 1.5;
+    P.lastY = e.clientY;
+  }
+});
+canvas.addEventListener('pointerdown', e => {
+  setPointer(e); P.down = true; P.lastY = e.clientY;
+  canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
+  World.pulse(P.x, P.y);
+  Sound.ping();
+});
+window.addEventListener('pointerup', () => { P.down = false; });
+window.addEventListener('pointercancel', () => { P.down = false; });
+window.addEventListener('wheel', e => {
+  World.vel += e.deltaY * 0.9;
+  World.vel = clamp(World.vel, -900, 1400);
+}, { passive: true });
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'PageDown') World.vel += 260;
+  else if (e.key === 'ArrowUp' || e.key === 'PageUp') World.vel -= 260;
+  else if (e.key === 's' || e.key === 'S') Sound.toggle();
+  else if (e.key === 'f' || e.key === 'F') toggleFS();
+});
+
+/* ---------------------------------------------------------------- */
+/* colour of the water at a given depth                             */
+/* ---------------------------------------------------------------- */
+const BANDS = [
+  { m: 0,    top: [ 86, 214, 205], bot: [ 22, 128, 150] },
+  { m: 90,   top: [ 30, 140, 160], bot: [ 12,  84, 120] },
+  { m: 320,  top: [ 12,  84, 120], bot: [  8,  50,  92] },
+  { m: 800,  top: [  7,  40,  78] , bot: [  5,  23,  52] },
+  { m: 1500, top: [  4,  20,  46], bot: [  2,  11,  28] },
+  { m: 2400, top: [  2,  10,  24], bot: [  1,   5,  14] },
+  { m: 3200, top: [  1,   5,  13], bot: [  1,   3,   9] },
+  { m: 3800, top: [  1,   4,  11], bot: [  2,   8,  16] }
+];
+function waterColour(m) {
+  let i = 0;
+  while (i < BANDS.length - 2 && m > BANDS[i + 1].m) i++;
+  const a = BANDS[i], b = BANDS[i + 1];
+  const t = clamp((m - a.m) / (b.m - a.m), 0, 1);
+  const mix = (p, q) => [Math.round(lerp(p[0], q[0], t)), Math.round(lerp(p[1], q[1], t)), Math.round(lerp(p[2], q[2], t))];
+  return { top: mix(a.top, b.top), bot: mix(a.bot, b.bot) };
+}
+const rgb = c => 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+
+/* ---------------------------------------------------------------- */
+/* THE WORLD                                                        */
+/* ---------------------------------------------------------------- */
+const MAX_DEPTH = 3800;
+
+const World = {
+  MPX: 1.6,            // pixels per metre
+  depth: 0,
+  vel: 0,
+  auto: lowMotion ? 0 : 38,   // metres per second of free sinking
+  t: 0,
+  started: false,
+  rising: false,
+  bottomT: 0,
+  snow: [], bubbles: [], plankton: [], fish: [], jellies: [],
+  anglers: [], corals: [], shafts: [], rings: [],
+  jellyK: 0, anglerK: 0, _jellyOn: false, _anglerOn: false, nameLift: 0,
+  whale: null, nameTargets: [], nameOn: 0, grit: [], flowDown: true,
+
+  screenY(m) { return (m - this.depth) * this.MPX + H * 0.5; },
+  surfaceY() { return -this.depth * this.MPX; },
+  floorY(x) { return this.screenY(MAX_DEPTH + 26) + Math.sin(x * 0.006 + 1.4) * 16 + Math.sin(x * 0.021) * 6; },
+
+  rebuild() {
+    const S = this;
+    /* marine snow — screen space, wraps */
+    const nSnow = Math.round(340 * Q) + 80;
+    S.snow = Array.from({ length: nSnow }, () => ({
+      x: rand(W), y: rand(H), r: rand(1.9, .35), a: rand(.5, .08),
+      d: rand(.85, .18), ph: rand(TAU), par: rand(1.15, .35)
+    }));
+    /* the word comes first: the field has to be big enough to spell it */
+    const fs = clamp(Math.min(W * 0.55 / Math.max(3.2, CFG.name.length * 0.6), H * 0.16), 34, 122);
+    S.nameTargets = sampleText(CFG.name, fs, 1500, '700');
+
+    /* plankton — the bioluminescent field that answers your hand */
+    const nPk = Math.max(Math.round(520 * Q) + 220, S.nameTargets.length);
+    S.plankton = Array.from({ length: nPk }, () => ({
+      x: rand(W), y: rand(H), r: rand(1.6, .6), e: 0, hue: rand(178, 158),
+      vx: rand(8, -8), vy: rand(6, -6), par: rand(1.1, .5), ph: rand(TAU),
+      jx: rand(1.3, -1.3), jy: rand(1.3, -1.3), tx: 0, ty: 0
+    }));
+    /* bubbles near the surface */
+    S.bubbles = Array.from({ length: Math.round(70 * Q) + 20 }, () => ({
+      x: rand(W), y: rand(H), r: rand(5, 1), sp: rand(46, 14), ph: rand(TAU), a: rand(.4, .1)
+    }));
+    /* fish shoal */
+    const nFish = Math.round(70 * Q) + 22;
+    S.fish = Array.from({ length: nFish }, () => ({
+      x: rand(W), y: rand(H), vx: rand(60, -60), vy: rand(24, -24),
+      len: rand(15, 7), ph: rand(TAU), lit: 0
+    }));
+    /* light shafts */
+    S.shafts = Array.from({ length: 6 }, (_, i) => ({
+      x: (i + .5) / 6 * W + rand(70, -70), w: rand(230, 90), ph: rand(TAU),
+      sp: rand(.26, .08), tilt: rand(.14, -.14)
+    }));
+    S.buildDeep();
+  },
+
+  /* creatures that live at fixed depths */
+  buildDeep() {
+    const S = this;
+    S.jellies = [];
+    const jn = Math.round(15 * Q) + 9;
+    for (let i = 0; i < jn; i++) {
+      S.jellies.push({
+        m: rand(2400, 420), x: rand(0.92, 0.08) * W, r: rand(52, 15),
+        ph: rand(TAU), sp: rand(1.5, .55), hue: rand(196, 155), drift: rand(26, -26),
+        tent: Math.round(rand(7, 4)), long: rand(4.6, 2.1)
+      });
+    }
+    S.anglers = [];
+    const an = Math.round(7 * Q) + 4;
+    for (let i = 0; i < an; i++) {
+      S.anglers.push({
+        m: rand(3620, 1950), x: rand(.9, .1) * W, ph: rand(TAU),
+        sp: rand(.9, .28), amp: rand(46, 14), size: rand(2.8, 1.3), blink: rand(TAU)
+      });
+    }
+    S.corals = [];
+    const cn = Math.round(20 * Q) + 12;
+    for (let i = 0; i < cn; i++) {
+      S.corals.push({
+        x: rand(W), h: rand(104, 18), ph: rand(TAU),
+        hue: rand(258, 166), sway: rand(1.4, .4), tips: Math.round(rand(4, 2))
+      });
+    }
+    S.grit = Array.from({ length: Math.round(90 * Q) + 40 }, () => ({
+      x: rand(W), dy: rand(58, 4), r: rand(1.5, .4), a: rand(.16, .03)
+    }));
+    S.whale = { m: 1720, x: -W * 0.4, sp: rand(46, 30), ph: 0, scale: clamp(W / 1200, .55, 1.35) };
+    S.rings = [];
+  },
+
+  pulse(x, y) {
+    this.rings.push({ x, y, r: 8, a: 1 });
+    for (const p of this.plankton) {
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < 240) p.e = Math.min(1.15, p.e + (1 - d / 240) * 1.1);
+    }
+    for (const f of this.fish) {
+      const dx = f.x - x, dy = f.y - y, d = Math.hypot(dx, dy) || 1;
+      if (d < 260) { f.vx += dx / d * 220; f.vy += dy / d * 220; f.lit = 1; }
+    }
+  },
+
+  /* ------------------------- update ------------------------- */
+  update(dt) {
+    const S = this;
+    S.t += dt;
+
+    /* depth physics */
+    if (S.started) {
+      if (S.rising) {
+        S.vel = smooth(S.vel, -420, dt, 1.6);
+      } else {
+        S.vel = smooth(S.vel, 0, dt, 1.9);
+      }
+      const base = S.rising ? 0 : (S.depth >= MAX_DEPTH - 0.5 ? 0 : S.auto);
+      S.depth += (base + S.vel) * dt;
+      if (S.depth <= 0) { S.depth = 0; if (S.rising) { S.rising = false; S.vel = 0; } }
+      if (S.depth >= MAX_DEPTH) { S.depth = MAX_DEPTH; if (S.vel > 0) S.vel = 0; }
+    }
+    const rate = S.started ? ((S.rising ? 0 : (S.depth >= MAX_DEPTH ? 0 : S.auto)) + S.vel) : 0;
+    S.flowDown = rate >= 0;
+    const fall = rate * S.MPX;   // px/s that the water slides past you
+
+    /* pointer smoothing (a slow, watery hand) */
+    if (!P.has) { P.x = W * 0.5; P.y = H * 0.5; }
+    P.sx = smooth(P.sx || P.x, P.x, dt, 9);
+    P.sy = smooth(P.sy || P.y, P.y, dt, 9);
+
+    const near = S.depth < 260, mid = S.depth < 1000;
+
+    /* marine snow */
+    for (const s of S.snow) {
+      s.y += (fall * s.par * 0.34 + s.d * 10) * dt;
+      s.x += Math.sin(S.t * .25 + s.ph) * 5 * dt;
+      if (s.y > H + 12) { s.y = -12; s.x = rand(W); }
+      if (s.y < -12) { s.y = H + 12; s.x = rand(W); }
+    }
+
+    /* bubbles (surface only) */
+    if (near) {
+      for (const b of S.bubbles) {
+        b.y -= b.sp * dt;
+        b.y += fall * 0.9 * dt;
+        b.x += Math.sin(S.t * 1.4 + b.ph) * 9 * dt;
+        if (b.y < -20 || b.y > H + 20) { b.y = H + rand(60, 10); b.x = rand(W); }
+      }
+    }
+
+    /* plankton */
+    const nameActive = S.depth > MAX_DEPTH - 330;
+    S.nameOn = smooth(S.nameOn, nameActive ? 1 : 0, dt, 1.7);
+    S.nameLift = smooth(S.nameLift, UI.letterShown ? 1 : 0, dt, 0.5);
+    const cx = W / 2, cy = H * (0.46 - 0.35 * S.nameLift);
+    for (let i = 0; i < S.plankton.length; i++) {
+      const p = S.plankton[i];
+      if (S.nameOn > 0.02 && S.nameTargets.length) {
+        /* spread the whole field evenly across the whole word */
+        const t = S.nameTargets[Math.min(S.nameTargets.length - 1,
+          Math.floor(i * S.nameTargets.length / S.plankton.length))];
+        p.tx = cx + t.x + p.jx + Math.sin(S.t * .7 + p.ph) * 1.1;
+        p.ty = cy + t.y + p.jy + Math.cos(S.t * .55 + p.ph) * 1.1;
+      }
+      if (S.nameOn > 0.02) {
+        const k = 30 * S.nameOn;
+        p.vx += (p.tx - p.x) * k * dt;
+        p.vy += (p.ty - p.y) * k * dt;
+        const dmp = Math.pow(0.80, dt * 60);
+        p.vx *= dmp; p.vy *= dmp;
+        /* burn a little brighter once the letter's veil comes up behind it */
+        p.e = Math.max(p.e, Math.min(1.05, S.nameOn * (0.85 + 0.35 * S.nameLift)));
+      } else {
+        p.vy += (fall * p.par * 0.35 - p.vy) * dt * 1.2;
+        p.vx += Math.sin(S.t * .4 + p.ph) * 4 * dt;
+        p.vx *= Math.pow(0.985, dt * 60);
+      }
+      /* the hand lights them */
+      const dx = p.x - P.sx, dy = p.y - P.sy, d = Math.hypot(dx, dy);
+      if (d < 112) {
+        const near2 = 1 - d / 112;
+        p.e = Math.min(.95, p.e + near2 * dt * 3.6);
+        if (S.nameOn < .5) {
+          p.vx += dx / (d || 1) * near2 * 24 * dt * 2;
+          p.vy += dy / (d || 1) * near2 * 24 * dt * 2;
+        }
+      }
+      p.e *= Math.pow(0.29, dt);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if (S.nameOn < .05) {
+        if (p.y > H + 8) { p.y = -8; p.x = rand(W); }
+        if (p.y < -8) { p.y = H + 8; p.x = rand(W); }
+        if (p.x < -8) p.x = W + 8; if (p.x > W + 8) p.x = -8;
+      }
+    }
+
+    /* shock rings */
+    for (let i = S.rings.length - 1; i >= 0; i--) {
+      const r = S.rings[i];
+      r.r += 420 * dt; r.a -= dt * 1.15;
+      if (r.a <= 0) S.rings.splice(i, 1);
+    }
+
+    /* fish — flocking, only in the sunlit + twilight zone */
+    if (mid) {
+      const F = S.fish, n = F.length;
+      for (let i = 0; i < n; i++) {
+        const f = F[i];
+        let ax = 0, ay = 0, cxs = 0, cys = 0, vxs = 0, vys = 0, cnt = 0;
+        for (let j = 0; j < n; j += 2) {
+          if (j === i) continue;
+          const o = F[j];
+          const dx = o.x - f.x, dy = o.y - f.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < 12000 && d2 > 0.01) {
+            cxs += o.x; cys += o.y; vxs += o.vx; vys += o.vy; cnt++;
+            if (d2 < 900) { const d = Math.sqrt(d2); ax -= dx / d * 70; ay -= dy / d * 70; }
+          }
+        }
+        if (cnt) {
+          ax += ((cxs / cnt) - f.x) * 0.55 + ((vxs / cnt) - f.vx) * 1.1;
+          ay += ((cys / cnt) - f.y) * 0.55 + ((vys / cnt) - f.vy) * 1.1;
+        }
+        /* avoid the hand */
+        const dx = f.x - P.sx, dy = f.y - P.sy, d = Math.hypot(dx, dy);
+        if (d < 170) { ax += dx / (d || 1) * 460 * (1 - d / 170); ay += dy / (d || 1) * 460 * (1 - d / 170); f.lit = Math.min(1, f.lit + dt * 2); }
+        /* stay on screen */
+        ax += (W * .5 - f.x) * 0.06; ay += (H * .5 - f.y) * 0.05;
+        f.vx += ax * dt; f.vy += ay * dt;
+        const sp = Math.hypot(f.vx, f.vy);
+        const max = 128, min = 34;
+        if (sp > max) { f.vx = f.vx / sp * max; f.vy = f.vy / sp * max; }
+        if (sp < min && sp > 0.01) { f.vx = f.vx / sp * min; f.vy = f.vy / sp * min; }
+        f.x += f.vx * dt; f.y += (f.vy + fall * 0.85) * dt;
+        f.ph += dt * (4 + sp * .04);
+        f.lit *= Math.pow(0.4, dt);
+        if (f.y > H + 40) { f.y = -40; f.x = rand(W); }
+        if (f.y < -40) { f.y = H + 40; f.x = rand(W); }
+        if (f.x < -40) f.x = W + 40; if (f.x > W + 40) f.x = -40;
+      }
+    }
+
+    /* jellies — nothing glows in the sunlight, so they start below 360 m */
+    const span = H / S.MPX;
+    const jellyWant = (S.depth > 420 && S.depth < 2850) ? 1 : 0;
+    if (jellyWant && !S._jellyOn) {
+      S._jellyOn = true;
+      for (const j of S.jellies) { j.m = S.depth + rand(span * 2.2, -span * .8); j.x = rand(W); }
+    } else if (!jellyWant) S._jellyOn = false;
+    S.jellyK = smooth(S.jellyK, jellyWant, dt, 0.5);
+    if (S._jellyOn) {
+      for (const j of S.jellies) {
+        j.ph += dt * j.sp;
+        j.x += Math.sin(S.t * .2 + j.ph * .3) * 7 * dt + j.drift * dt * .25;
+        j.m -= Math.max(0, Math.sin(j.ph)) * 5.5 * dt;   // they swim upward as they pulse
+        if (j.x < -60) j.x = W + 60; if (j.x > W + 60) j.x = -60;
+        const jy = S.screenY(j.m);
+        if (S.flowDown) { if (jy < -300) { j.m = S.depth + span * 1.6 + rand(500, 60); j.x = rand(W); } }
+        else if (jy > H + 460) { j.m = S.depth - span * .8 - rand(400, 60); j.x = rand(W); }
+      }
+    }
+
+    /* anglerfish — the only warm light down here */
+    const angWant = S.depth > 1900 ? 1 : 0;
+    if (angWant && !S._anglerOn) {
+      S._anglerOn = true;
+      for (const a of S.anglers) { a.m = S.depth + rand(span * 1.6, -span * .5); a.x = rand(W); }
+    } else if (!angWant) S._anglerOn = false;
+    S.anglerK = smooth(S.anglerK, angWant, dt, 0.5);
+    if (S._anglerOn) {
+      for (const a of S.anglers) {
+        a.ph += dt * a.sp;
+        a.blink += dt * rand(2.4, .6);
+        a.x += Math.sin(a.ph) * a.amp * dt * .5;
+        const ay = S.screenY(a.m);
+        if (S.flowDown) { if (ay < -200) { a.m = S.depth + span * 1.5 + rand(700, 120); a.x = rand(W); } }
+        else if (ay > H + 320) { a.m = S.depth - span * .7 - rand(500, 80); a.x = rand(W); }
+      }
+    }
+
+    /* whale */
+    const wh = S.whale;
+    if (Math.abs(wh.m - S.depth) < 900) {
+      wh.x += wh.sp * dt;
+      wh.ph += dt * 0.7;
+      if (wh.x > W + W * 0.6) { wh.x = -W * 0.7; wh.m = clamp(S.depth + rand(700, -200), 720, 2600); }
+    }
+
+    if (S.depth >= MAX_DEPTH - 1) S.bottomT += dt; else S.bottomT = 0;
+
+    UI.update(dt);
+    Sound.update(dt);
+  },
+
+  /* ------------------------- draw --------------------------- */
+  draw(dt) {
+    const S = this, d = S.depth;
+    const col = waterColour(d);
+
+    /* water column */
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, rgb(col.top));
+    g.addColorStop(1, rgb(col.bot));
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    /* the surface itself, only visible in the first metres */
+    if (d < 90) drawSurface(ctx, S.surfaceY(), 1 - d / 90);
+
+    /* fade the glow buffer, then paint everything luminous into it */
+    fx.setTransform(1, 0, 0, 1, 0, 0);
+    fx.globalCompositeOperation = 'destination-out';
+    fx.fillStyle = 'rgba(0,0,0,' + (coarse ? 0.30 : 0.22) + ')';
+    fx.fillRect(0, 0, fxc.width, fxc.height);
+    fx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    fx.globalCompositeOperation = 'lighter';
+
+    if (d < 340) drawShafts(fx, d);
+    drawJellies(fx, d);
+    drawAnglers(fx, d);
+    if (d > 3300) drawCorals(fx, d);
+    drawPlankton(fx);
+    drawRings(fx);
+    if (!coarse && S.started) drawHand(fx);
+
+    /* matter, not light: drawn straight onto the water so it never smears */
+    ctx.globalCompositeOperation = 'source-over';
+    drawSnow(ctx, d);
+    if (d < 1000) drawFish(ctx, d);
+    if (Math.abs(S.whale.m - d) < 900) drawWhale(ctx, S.whale, col);
+
+    if (d < 200) drawBubbles(ctx, d);
+
+    /* composite the glow */
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(fxc, 0, 0);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+
+    /* sea floor */
+    if (d > 3520) drawFloor(ctx, d);
+
+    drawGauge(ctx, d);
+  }
+};
+
+/* ---------------------------------------------------------------- */
+/* drawing routines                                                 */
+/* ---------------------------------------------------------------- */
+function drawSurface(c, y, k) {
+  const top = Math.min(y, H);
+  if (top < -40) return;
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  /* rippled ceiling of light */
+  for (let i = 0; i < 3; i++) {
+    c.beginPath();
+    c.moveTo(0, top - 6 - i * 5);
+    for (let x = 0; x <= W; x += 14) {
+      const yy = top - 6 - i * 5 + Math.sin(x * 0.016 + World.t * (1.1 + i * .35) + i) * (5 + i * 2)
+        + Math.sin(x * 0.041 - World.t * .7) * 2.2;
+      c.lineTo(x, yy);
+    }
+    c.strokeStyle = 'rgba(180,255,246,' + (0.16 * k / (i + 1)) + ')';
+    c.lineWidth = 2.4 - i * .6;
+    c.stroke();
+  }
+  /* caustic web just under it */
+  const n = 26;
+  c.lineWidth = 1;
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * W + Math.sin(World.t * .6 + i) * 26;
+    const a = 0.05 * k * (0.5 + 0.5 * Math.sin(World.t * 1.7 + i * 1.3));
+    c.strokeStyle = 'rgba(160,255,240,' + a + ')';
+    c.beginPath();
+    c.moveTo(x, top);
+    c.quadraticCurveTo(x + Math.sin(World.t + i) * 40, top + 120, x + Math.sin(World.t * .5 + i) * 90, top + 300);
+    c.stroke();
+  }
+  c.restore();
+}
+
+function drawShafts(c, d) {
+  const k = clamp(1 - d / 340, 0, 1);
+  if (k <= 0.01 || !RAY) return;
+  const top = World.surfaceY();
+  const len = H * 1.5;
+  c.save();
+  for (const s of World.shafts) {
+    const breathe = .78 + .22 * Math.sin(World.t * s.sp + s.ph);
+    const sw = s.w * breathe;
+    const x = s.x + Math.sin(World.t * s.sp * .8 + s.ph) * 30;
+    c.globalAlpha = 0.13 * k * breathe;
+    c.translate(x, top);
+    c.rotate(s.tilt + Math.sin(World.t * s.sp * .5 + s.ph) * .02);
+    c.drawImage(RAY, -sw / 2, -20, sw, len);
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  c.globalAlpha = 1;
+  c.restore();
+}
+
+function drawSnow(c, d) {
+  /* marine snow is a deep-water thing — barely there in the sunlight */
+  const dim = clamp(d / 340, .12, 1) * clamp(1.3 - d / 3400, .35, 1);
+  for (const s of World.snow) {
+    const tw = 0.6 + 0.4 * Math.sin(World.t * 1.6 + s.ph);
+    c.fillStyle = 'rgba(206,240,255,' + (s.a * tw * dim) + ')';
+    c.beginPath();
+    c.arc(s.x, s.y, s.r, 0, TAU);
+    c.fill();
+  }
+}
+
+function drawBubbles(c, d) {
+  const k = clamp(1 - d / 200, 0, 1);
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (const b of World.bubbles) {
+    c.strokeStyle = 'rgba(210,255,252,' + (b.a * k) + ')';
+    c.lineWidth = 1;
+    c.beginPath();
+    c.arc(b.x, b.y, b.r, 0, TAU);
+    c.stroke();
+    c.fillStyle = 'rgba(255,255,255,' + (b.a * k * .35) + ')';
+    c.beginPath();
+    c.arc(b.x - b.r * .3, b.y - b.r * .3, b.r * .3, 0, TAU);
+    c.fill();
+  }
+  c.restore();
+}
+
+function drawPlankton(c) {
+  for (const p of World.plankton) {
+    const e = clamp(p.e, 0, 1.05);
+    const tightNow = World.nameOn > .45;
+    const base = 0.10 + 0.06 * Math.sin(World.t * 2 + p.ph);
+    const a = base + e * (tightNow ? 0.72 : 0.8);
+    if (a < 0.02) continue;
+    const r = tightNow ? 1.15 : p.r * (1 + e * 1.4);
+    if (e > 0.06 && GLOW) {
+      const tight = tightNow;                     // letters need edges, drifting plankton do not
+      const rr = r * (tight ? 2.3 : 6.5);
+      c.globalAlpha = Math.min(1, e * (tight ? .13 : .42));
+      c.drawImage(GLOW, p.x - rr, p.y - rr, rr * 2, rr * 2);
+      c.globalAlpha = 1;
+    }
+    c.fillStyle = 'hsla(' + p.hue + ',96%,' + (62 + e * 12) + '%,' + Math.min(1, a) + ')';
+    c.beginPath(); c.arc(p.x, p.y, r, 0, TAU); c.fill();
+  }
+}
+
+function drawRings(c) {
+  for (const r of World.rings) {
+    c.strokeStyle = 'rgba(126,249,224,' + (r.a * .5) + ')';
+    c.lineWidth = 2 * r.a + .4;
+    c.beginPath(); c.arc(r.x, r.y, r.r, 0, TAU); c.stroke();
+    c.strokeStyle = 'rgba(180,255,246,' + (r.a * .22) + ')';
+    c.beginPath(); c.arc(r.x, r.y, r.r * .72, 0, TAU); c.stroke();
+  }
+}
+
+function drawHand(c) {
+  const g = c.createRadialGradient(P.sx, P.sy, 0, P.sx, P.sy, 58);
+  g.addColorStop(0, 'rgba(126,249,224,.10)');
+  g.addColorStop(.5, 'rgba(110,220,230,.03)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = g;
+  c.beginPath(); c.arc(P.sx, P.sy, 58, 0, TAU); c.fill();
+  c.fillStyle = 'rgba(215,255,250,.6)';
+  c.beginPath(); c.arc(P.sx, P.sy, 1.7, 0, TAU); c.fill();
+}
+
+function drawFish(c, d) {
+  const k = clamp(1 - (d - 500) / 500, 0, 1);
+  if (k <= .01) return;
+  for (const f of World.fish) {
+    const ang = Math.atan2(f.vy, f.vx);
+    const wig = Math.sin(f.ph) * 0.42;
+    c.save();
+    c.translate(f.x, f.y);
+    c.rotate(ang);
+    const L = f.len, w = L * .34, py = wig * w * 1.15;
+    /* body: pointed nose, tapered to the tail joint */
+    c.fillStyle = 'rgba(16,58,78,' + (0.34 + f.lit * .2) * k + ')';
+    c.beginPath();
+    c.moveTo(L, 0);
+    c.quadraticCurveTo(L * .08, -w, -L * .52, py - w * .2);
+    c.quadraticCurveTo(-L * .46, py, -L * .52, py + w * .2);
+    c.quadraticCurveTo(L * .08, w, L, 0);
+    c.fill();
+    /* the flank catching what light there is */
+    c.strokeStyle = 'rgba(206,241,250,' + (0.30 + f.lit * .55) * k + ')';
+    c.lineWidth = Math.max(.8, w * .34);
+    c.beginPath();
+    c.moveTo(L * .92, -w * .1);
+    c.quadraticCurveTo(L * .1, -w * .82, -L * .46, py - w * .18);
+    c.stroke();
+    /* tail fin */
+    c.fillStyle = 'rgba(140,190,212,' + (0.20 + f.lit * .34) * k + ')';
+    c.beginPath();
+    c.moveTo(-L * .5, py);
+    c.lineTo(-L * 1.05, py - w * .95 - wig * w * .5);
+    c.quadraticCurveTo(-L * .78, py, -L * 1.05, py + w * .8 - wig * w * .5);
+    c.closePath();
+    c.fill();
+    /* eye */
+    c.fillStyle = 'rgba(226,250,252,' + (0.3 + f.lit * .6) * k + ')';
+    c.beginPath(); c.arc(L * .62, -w * .22, Math.max(.7, L * .07), 0, TAU); c.fill();
+    c.restore();
+  }
+}
+
+function drawJellies(c, d) {
+  const K = World.jellyK;
+  if (K < .015) return;
+  for (const j of World.jellies) {
+    const y = World.screenY(j.m);
+    if (y < -240 || y > H + 240) continue;
+    const pulse = Math.sin(j.ph);
+    const sq = 1 + pulse * .17;
+    const rw = j.r * sq, rh = j.r * (1.9 - sq * .55);
+    const x = j.x;
+    const glow = (0.45 + 0.4 * Math.max(0, pulse)) * K;
+
+    /* halo */
+    const g = c.createRadialGradient(x, y, 0, x, y, j.r * 4.2);
+    g.addColorStop(0, 'hsla(' + j.hue + ',95%,70%,' + (0.20 * glow) + ')');
+    g.addColorStop(.4, 'hsla(' + j.hue + ',95%,62%,' + (0.06 * glow) + ')');
+    g.addColorStop(1, 'hsla(' + j.hue + ',95%,60%,0)');
+    c.fillStyle = g;
+    c.beginPath(); c.arc(x, y, j.r * 4.2, 0, TAU); c.fill();
+
+    /* tentacles */
+    c.lineWidth = Math.max(.7, j.r * .045);
+    for (let t = 0; t < j.tent; t++) {
+      const off = (t / (j.tent - 1) - .5) * rw * 1.5;
+      c.beginPath();
+      c.moveTo(x + off, y + rh * .2);
+      const len = j.r * j.long;
+      for (let s = 1; s <= 8; s++) {
+        const u = s / 8;
+        const sx2 = x + off + Math.sin(World.t * 1.6 + j.ph + t + u * 3.4) * (10 + j.r * .22) * u;
+        const sy2 = y + rh * .2 + len * u;
+        c.lineTo(sx2, sy2);
+      }
+      c.strokeStyle = 'hsla(' + j.hue + ',95%,72%,' + (0.30 * glow) + ')';
+      c.stroke();
+    }
+
+    /* bell */
+    c.beginPath();
+    c.moveTo(x - rw, y);
+    c.bezierCurveTo(x - rw * .96, y - rh * 1.35, x + rw * .96, y - rh * 1.35, x + rw, y);
+    c.bezierCurveTo(x + rw * .62, y + rh * .34, x - rw * .62, y + rh * .34, x - rw, y);
+    const bg = c.createLinearGradient(x, y - rh, x, y + rh * .3);
+    bg.addColorStop(0, 'hsla(' + j.hue + ',96%,80%,' + (0.42 * glow) + ')');
+    bg.addColorStop(.6, 'hsla(' + (j.hue + 24) + ',96%,64%,' + (0.26 * glow) + ')');
+    bg.addColorStop(1, 'hsla(' + (j.hue + 40) + ',96%,58%,0.02)');
+    c.fillStyle = bg;
+    c.fill();
+    c.lineWidth = Math.max(.8, j.r * .055);
+    c.strokeStyle = 'hsla(' + j.hue + ',100%,86%,' + (0.5 * glow) + ')';
+    c.stroke();
+    /* inner organs */
+    c.fillStyle = 'hsla(' + (j.hue + 30) + ',100%,88%,' + (0.35 * glow) + ')';
+    for (let o = 0; o < 4; o++) {
+      const ox = x + (o - 1.5) * rw * .34;
+      c.beginPath(); c.ellipse(ox, y - rh * .38, rw * .075, rh * .3, 0, 0, TAU); c.fill();
+    }
+  }
+}
+
+function drawAnglers(c, d) {
+  const K = World.anglerK;
+  if (K < .015) return;
+  for (const a of World.anglers) {
+    const y = World.screenY(a.m) + Math.sin(a.ph) * a.amp;
+    if (y < -120 || y > H + 120) continue;
+    const bl = (0.35 + 0.65 * Math.pow(Math.max(0, Math.sin(a.blink)), 4)) * K;
+    const x = a.x + Math.sin(a.ph * 1.3) * 14;
+    const R = a.size * 13;
+    const g = c.createRadialGradient(x, y, 0, x, y, R);
+    g.addColorStop(0, 'rgba(255,179,107,' + (0.42 * bl) + ')');
+    g.addColorStop(.3, 'rgba(255,150,80,' + (0.07 * bl) + ')');
+    g.addColorStop(1, 'rgba(255,140,70,0)');
+    c.fillStyle = g;
+    c.beginPath(); c.arc(x, y, R, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(255,226,190,' + (0.85 * bl) + ')';
+    c.beginPath(); c.arc(x, y, a.size, 0, TAU); c.fill();
+    /* the faint suggestion of a body behind the lure */
+    c.strokeStyle = 'rgba(255,179,107,' + (0.06 * bl) + ')';
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(x, y);
+    c.quadraticCurveTo(x + a.size * 6, y + a.size * 8, x + a.size * 3, y + a.size * 17);
+    c.stroke();
+  }
+}
+
+function drawWhale(c, wh, col) {
+  const y = World.screenY(wh.m);
+  if (y < -420 || y > H + 420) return;
+  const s = wh.scale * Math.min(W, 1400) / 1400 * 1.15;
+  const L = 620 * s, Hh = 190 * s;
+  const ty = Math.sin(wh.ph) * Hh * 0.20;
+  c.save();
+  c.translate(wh.x, y);
+  c.globalAlpha = 0.92;
+  const dark = 'rgba(' + Math.round(col.bot[0] * .35) + ',' + Math.round(col.bot[1] * .35) + ',' + Math.round(col.bot[2] * .45) + ',0.96)';
+  c.fillStyle = dark;
+  /* one continuous outline: blunt head at the right, flukes at the left */
+  c.beginPath();
+  c.moveTo(L * .50, Hh * .02);
+  c.bezierCurveTo(L * .49, -Hh * .22, L * .38, -Hh * .34, L * .18, -Hh * .36);
+  c.bezierCurveTo(-L * .04, -Hh * .38, -L * .26, -Hh * .26, -L * .40, ty - Hh * .07);
+  c.lineTo(-L * .50, ty - Hh * .30);
+  c.quadraticCurveTo(-L * .60, ty - Hh * .52, -L * .66, ty - Hh * .40);
+  c.quadraticCurveTo(-L * .60, ty - Hh * .16, -L * .46, ty + Hh * .01);
+  c.quadraticCurveTo(-L * .60, ty + Hh * .18, -L * .66, ty + Hh * .40);
+  c.quadraticCurveTo(-L * .59, ty + Hh * .50, -L * .50, ty + Hh * .28);
+  c.lineTo(-L * .40, ty + Hh * .07);
+  c.bezierCurveTo(-L * .24, Hh * .36, L * .02, Hh * .50, L * .22, Hh * .44);
+  c.bezierCurveTo(L * .40, Hh * .39, L * .50, Hh * .26, L * .50, Hh * .02);
+  c.closePath();
+  c.fill();
+  /* pectoral fin */
+  c.beginPath();
+  c.moveTo(L * .18, Hh * .40);
+  c.quadraticCurveTo(L * .02, Hh * .86, -L * .14, Hh * .70);
+  c.quadraticCurveTo(L * .02, Hh * .50, L * .18, Hh * .40);
+  c.fill();
+  c.restore();
+  /* a line of light along the belly — the only way you know it's there */
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 18; i++) {
+    const u = i / 17;
+    const px = wh.x + lerp(L * .40, -L * .34, u);
+    const py = y + lerp(Hh * .40, Hh * .10, u) + Math.sin(u * 2.6 + wh.ph) * Hh * .05;
+    const a = 0.12 * (0.35 + 0.65 * Math.sin(World.t * 1.8 + i * .8)) * (1 - Math.abs(u - .45));
+    c.fillStyle = 'rgba(126,249,224,' + a + ')';
+    c.beginPath(); c.arc(px, py, 1.9 * s, 0, TAU); c.fill();
+  }
+  c.restore();
+}
+
+function drawCorals(c, d) {
+  for (const co of World.corals) {
+    const base = World.floorY(co.x);
+    if (base < -60 || base > H + 200) continue;
+    const sway = Math.sin(World.t * co.sway + co.ph) * 10;
+    c.lineWidth = 1.2;
+    c.strokeStyle = 'hsla(' + co.hue + ',80%,62%,0.13)';
+    c.beginPath();
+    c.moveTo(co.x, base);
+    c.quadraticCurveTo(co.x + sway, base - co.h * .6, co.x + sway * 1.6, base - co.h);
+    c.stroke();
+    /* branches */
+    c.lineWidth = .9;
+    for (let t = 0; t < co.tips; t++) {
+      const u = 0.42 + t / co.tips * .5;
+      const bx = co.x + sway * 1.6 * u, by = base - co.h * u;
+      const spread = (t % 2 ? 1 : -1) * co.h * .34;
+      c.beginPath();
+      c.moveTo(bx, by);
+      c.quadraticCurveTo(bx + spread * .5, by - co.h * .1, bx + spread, by - co.h * .26);
+      c.stroke();
+    }
+    for (let t = 0; t < co.tips; t++) {
+      const u = 0.42 + t / co.tips * .5;
+      const spread = (t % 2 ? 1 : -1) * co.h * .34;
+      const tx = co.x + sway * 1.6 * u + spread, ty = base - co.h * u - co.h * .26;
+      const a = 0.14 + 0.16 * Math.sin(World.t * 2.2 + co.ph + t);
+      const g = c.createRadialGradient(tx, ty, 0, tx, ty, 9);
+      g.addColorStop(0, 'hsla(' + co.hue + ',92%,74%,' + a + ')');
+      g.addColorStop(1, 'hsla(' + co.hue + ',92%,60%,0)');
+      c.fillStyle = g;
+      c.beginPath(); c.arc(tx, ty, 9, 0, TAU); c.fill();
+      c.fillStyle = 'hsla(' + co.hue + ',95%,86%,' + (a + .28) + ')';
+      c.beginPath(); c.arc(tx, ty, 1.1, 0, TAU); c.fill();
+    }
+  }
+}
+
+function drawFloor(c, d) {
+  const y = World.screenY(MAX_DEPTH + 26);
+  if (y > H + 60) return;
+  const g = c.createLinearGradient(0, y - 110, 0, H);
+  g.addColorStop(0, 'rgba(4,17,26,0)');
+  g.addColorStop(.35, 'rgba(6,22,32,.82)');
+  g.addColorStop(1, 'rgba(3,11,18,1)');
+  c.fillStyle = g;
+  c.beginPath();
+  c.moveTo(0, H);
+  for (let x = 0; x <= W; x += 20) c.lineTo(x, World.floorY(x));
+  c.lineTo(W, World.floorY(W));
+  c.lineTo(W, H);
+  c.closePath();
+  c.fill();
+  /* a hair of light catching the ridge, and sediment settled on it */
+  c.strokeStyle = 'rgba(126,249,224,.12)';
+  c.lineWidth = 1;
+  c.beginPath();
+  for (let x = 0; x <= W; x += 20) x === 0 ? c.moveTo(x, World.floorY(x)) : c.lineTo(x, World.floorY(x));
+  c.stroke();
+  if (World.grit) {
+    for (const gr of World.grit) {
+      c.fillStyle = 'rgba(150,210,220,' + gr.a + ')';
+      c.beginPath(); c.arc(gr.x, World.floorY(gr.x) + gr.dy, gr.r, 0, TAU); c.fill();
+    }
+  }
+}
+
+/* the depth gauge — a real instrument, not decoration */
+function drawGauge(c, d) {
+  if (!World.started) return;
+  const x = W - (coarse ? 26 : 44);
+  const midY = H * 0.5;
+  const pxPerM = 0.42;
+  c.save();
+  c.globalCompositeOperation = 'source-over';
+  c.strokeStyle = 'rgba(126,249,224,.14)';
+  c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x, H * .16); c.lineTo(x, H * .84); c.stroke();
+
+  const first = Math.floor((d - (midY - H * .16) / pxPerM) / 50) * 50;
+  c.textAlign = 'right';
+  c.textBaseline = 'middle';
+  for (let m = first; m < d + (H * .84 - midY) / pxPerM; m += 50) {
+    if (m < 0 || m > MAX_DEPTH) continue;
+    const yy = midY + (m - d) * pxPerM;
+    if (yy < H * .16 || yy > H * .84) continue;
+    const major = m % 500 === 0;
+    const fade = 1 - Math.abs(yy - midY) / (H * .34);
+    c.strokeStyle = 'rgba(126,249,224,' + (0.1 + fade * (major ? .3 : .12)) + ')';
+    c.beginPath();
+    c.moveTo(x - (major ? 11 : 5), yy); c.lineTo(x, yy);
+    c.stroke();
+    if (major && fade > .15 && !coarse) {
+      c.fillStyle = 'rgba(126,249,224,' + (fade * .42) + ')';
+      c.font = '400 10px ' + SERIF;
+      c.fillText(m + '', x - 16, yy);
+    }
+  }
+  /* current depth */
+  c.fillStyle = 'rgba(223,245,242,.9)';
+  c.font = '400 ' + (coarse ? 16 : 20) + 'px ' + SERIF;
+  c.fillText(Math.round(d).toLocaleString('en-US'), x - (coarse ? 8 : 14), midY - 9);
+  c.fillStyle = 'rgba(126,249,224,.5)';
+  c.font = '400 10px ' + SERIF;
+  c.fillText('metres', x - (coarse ? 8 : 14), midY + 9);
+  c.strokeStyle = 'rgba(223,245,242,.55)';
+  c.beginPath(); c.moveTo(x - 14, midY); c.lineTo(x + 5, midY); c.stroke();
+  c.restore();
+}
+
+/* ---------------------------------------------------------------- */
+/* interface: field notes, the letter, buttons                      */
+/* ---------------------------------------------------------------- */
+const UI = {
+  noteEl: document.getElementById('note'),
+  noteText: document.getElementById('noteText'),
+  noteDepth: document.getElementById('noteDepth'),
+  tipEl: document.getElementById('tip'),
+  letterEl: document.getElementById('letter'),
+  letterIn: document.getElementById('letterIn'),
+  idx: -1, hold: 0, tipT: 0, letterShown: false,
+
+  init() {
+    document.getElementById('gateName').textContent = CFG.name;
+    document.getElementById('gateLine').textContent = CFG.openingLine;
+    const frag = document.createDocumentFragment();
+    CFG.letter.forEach(l => {
+      const p = document.createElement('p');
+      p.className = 'line'; p.textContent = l;
+      frag.appendChild(p);
+    });
+    const sg = document.createElement('p');
+    sg.className = 'sign'; sg.textContent = CFG.signature;
+    frag.appendChild(sg);
+    const btn = document.createElement('button');
+    btn.className = 'again'; btn.textContent = CFG.againLabel;
+    btn.addEventListener('click', () => this.rise());
+    frag.appendChild(btn);
+    this.letterIn.appendChild(frag);
+    this.againBtn = btn;
+  },
+
+  showTip(text, secs) {
+    this.tipEl.textContent = text;
+    this.tipEl.classList.add('show');
+    this.tipT = secs;
+  },
+
+  update(dt) {
+    if (this.tipT > 0) {
+      this.tipT -= dt;
+      if (this.tipT <= 0) this.tipEl.classList.remove('show');
+    }
+    /* field notes */
+    let want = -1;
+    for (let i = 0; i < CFG.notes.length; i++) {
+      const n = CFG.notes[i];
+      if (World.depth >= n.m && World.depth < n.m + 300) want = i;
+    }
+    if (want !== this.idx) {
+      this.idx = want;
+      if (want >= 0) {
+        const n = CFG.notes[want];
+        this.noteDepth.textContent = n.m.toLocaleString('en-US') + ' m';
+        this.noteText.textContent = n.text;
+        this.noteEl.classList.add('show');
+        Sound.chime();
+      } else {
+        this.noteEl.classList.remove('show');
+      }
+    }
+    /* the letter */
+    if (World.bottomT > 10 && !this.letterShown) {
+      this.letterShown = true;
+      this.letterEl.classList.add('show');
+      const lines = this.letterIn.querySelectorAll('.line');
+      lines.forEach((l, i) => setTimeout(() => l.classList.add('in'), 900 + i * 2200));
+      setTimeout(() => this.letterIn.querySelector('.sign').classList.add('in'), 900 + lines.length * 2200);
+      setTimeout(() => this.againBtn.classList.add('in'), 1800 + lines.length * 2200);
+      Sound.arrive();
+    }
+  },
+
+  rise() {
+    this.letterShown = false;
+    this.letterEl.classList.remove('show');
+    this.letterIn.querySelectorAll('.line').forEach(l => l.classList.remove('in'));
+    this.letterIn.querySelector('.sign').classList.remove('in');
+    this.againBtn.classList.remove('in');
+    World.rising = true;
+    World.vel = -280;
+    Sound.ping();
+    setTimeout(() => { this.showTip('Sinking again', 4); }, 1200);
+  }
+};
+
+/* ---------------------------------------------------------------- */
+/* sound — a loaded music track, plus synthesised effects over it   */
+/* ---------------------------------------------------------------- */
+const Sound = {
+  ac: null, on: false, master: null, verb: null, drone: [], droneFilter: null,
+  whaleT: 12, bubbleT: 3,
+  /* music: element, graph nodes, and the watchdog that catches the
+     case where the browser hands the graph silence (see verifyMusic) */
+  mEl: null, mNode: null, mGain: null, mFilter: null, mAnalyser: null,
+  droneMute: null, musicOn: false, routed: false, checkT: 0, fadeTimer: 0,
+
+  boot() {
+    if (this.ac) return;
+    console.log('[dive] sound build 3 — music file: "' +
+      (((CFG.music || {}).file) || '(none)') + '", synthesised effects: ' +
+      ((CFG.music || {}).keepEffects === false ? 'off' : 'on'));
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      const ac = this.ac = new AC();
+      const master = this.master = ac.createGain();
+      master.gain.value = 0;
+      master.connect(ac.destination);
+
+      const verb = this.verb = ac.createConvolver();
+      const len = Math.floor(ac.sampleRate * 3.4);
+      const buf = ac.createBuffer(2, len, ac.sampleRate);
+      for (let ch = 0; ch < 2; ch++) {
+        const dt = buf.getChannelData(ch);
+        for (let i = 0; i < len; i++) dt[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.8);
+      }
+      verb.buffer = buf;
+      const wet = this.wet = ac.createGain();
+      wet.gain.value = 0.55;
+      verb.connect(wet); wet.connect(master);
+
+      /* the drone: the ocean itself */
+      const f = this.droneFilter = ac.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 620; f.Q.value = 1.2;
+      f.connect(master); f.connect(verb);
+      const dm = this.droneMute = ac.createGain();
+      dm.gain.value = 1;                 // nothing modulates this one
+      dm.connect(f);
+      const dg = this.droneGain = ac.createGain();
+      dg.gain.value = 0.16;
+      dg.connect(dm);
+      [55, 55.35, 82.5, 110.2].forEach((hz, i) => {
+        const o = ac.createOscillator();
+        o.type = i > 1 ? 'sine' : 'sawtooth';
+        o.frequency.value = hz;
+        const g = ac.createGain();
+        g.gain.value = i > 1 ? 0.28 : 0.5;
+        o.connect(g); g.connect(dg);
+        o.start();
+        this.drone.push({ o, g });
+      });
+      /* slow swell */
+      const lfo = ac.createOscillator(); lfo.frequency.value = 0.055;
+      const lg = ac.createGain(); lg.gain.value = 0.07;
+      lfo.connect(lg); lg.connect(dg.gain); lfo.start();
+
+      this.bootMusic();
+    } catch (e) { this.ac = null; }
+  },
+
+  /* ---- the music file ------------------------------------------ */
+  bootMusic() {
+    const cfg = CFG.music || {};
+    const file = (cfg.file || '').trim();
+    if (!file) return;                 // no file → keep the ocean drone
+    const ac = this.ac;
+
+    const el = this.mEl = new Audio();
+    el.loop = cfg.loop !== false;
+    el.preload = 'auto';
+    el.volume = 1;                     // the real level is set below
+    el.addEventListener('error', () => this.musicFailed());
+    el.src = file;                     // ← your local path
+    el.load();
+
+    this.musicOn = true;
+    /* the track takes the drone's place. Mute downstream of droneGain —
+       the swell LFO is summed into droneGain.gain, so zeroing that
+       param leaves the LFO still swinging it.                        */
+    if (this.droneMute) this.droneMute.gain.value = 0;
+
+    try {
+      const src = this.mNode = ac.createMediaElementSource(el);
+      const f = this.mFilter = ac.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 20000; f.Q.value = 0.6;
+      const g = this.mGain = ac.createGain();
+      g.gain.value = this.musicVol();
+      src.connect(f); f.connect(g); g.connect(this.master);
+      const send = ac.createGain(); send.gain.value = 0.16;
+      g.connect(send); send.connect(this.verb);   // a little of the room
+      const an = this.mAnalyser = ac.createAnalyser();
+      an.fftSize = 512; g.connect(an);
+      this.routed = true;
+    } catch (e) {
+      this.routed = false;             // play the element on its own
+    }
+  },
+
+  /* run Sound.debug() in the console to see what is making noise */
+  debug() {
+    const dg = this.droneGain ? this.droneGain.gain.value : null;
+    const dm = this.droneMute ? this.droneMute.gain.value : null;
+    console.log({
+      soundOn: this.on,
+      oceanDrone: dm === 0 ? 'muted' : 'audible (' + dg + ')',
+      musicFile: ((CFG.music || {}).file) || '(none)',
+      musicLoaded: this.musicOn,
+      musicPlaying: this.mEl ? !this.mEl.paused : false,
+      musicSrc: this.mEl ? this.mEl.src : null,
+      throughAudioGraph: this.routed,
+      synthEffects: this.fxOK() ? 'on' : 'off'
+    });
+  },
+
+  musicVol() {
+    const v = (CFG.music || {}).volume;
+    return v == null ? 0.7 : clamp(v, 0, 1);
+  },
+  /* true unless the music is playing and effects were turned off */
+  fxOK() { return !(this.musicOn && (CFG.music || {}).keepEffects === false); },
+
+  /* the file is missing or won't decode → bring the ocean back so the
+     descent is never left in dead silence                          */
+  musicFailed() {
+    if (!this.musicOn) return;
+    this.musicOn = false;
+    if (this.mEl) { try { this.mEl.pause(); } catch (e) {} }
+    if (this.mGain) this.mGain.gain.value = 0;
+    if (this.droneMute) this.droneMute.gain.value = 1;
+    console.warn('[music] could not load "' + ((CFG.music || {}).file || '') +
+      '"\n         tried: ' + (this.mEl ? this.mEl.src : '?') +
+      '\n         falling back to the synthesised ocean drone.');
+  },
+
+  playMusic() {
+    if (!this.musicOn || !this.mEl) return;
+    if (!this.routed) this.mEl.volume = 0;
+    const p = this.mEl.play();
+    if (p && p.catch) p.catch(() => {});
+    if (!this.routed) this.fadeEl(this.musicVol(), 1400);
+    if (!this.announced) {
+      this.announced = true;
+      this.mEl.addEventListener('playing',
+        () => console.log('[music] playing ' + this.mEl.src), { once: true });
+    }
+    this.checkT = 1.6;                 // arm the silence watchdog
+  },
+
+  /* volume fade for the fallback path, where there is no GainNode */
+  fadeEl(to, ms, done) {
+    const el = this.mEl; if (!el) return;
+    clearInterval(this.fadeTimer);
+    const from = el.volume, t0 = performance.now();
+    this.fadeTimer = setInterval(() => {
+      const k = clamp((performance.now() - t0) / ms, 0, 1);
+      el.volume = clamp(from + (to - from) * k, 0, 1);
+      if (k >= 1) { clearInterval(this.fadeTimer); if (done) done(); }
+    }, 40);
+  },
+
+  /* Opened straight off the disk, Chrome will not let a file:// track
+     through the audio graph — it connects fine and then plays nothing
+     but silence. Listen for that, and if it happened, abandon the
+     graph and play the element on its own instead.                  */
+  verifyMusic() {
+    const el = this.mEl, an = this.mAnalyser;
+    if (!el || !an) return;
+    if (el.paused || el.currentTime < 0.35) { this.checkT = 1.2; return; }
+    /* a track that opens on silence is not a dead graph — look again */
+    this.silentReads = (this.silentReads || 0);
+    const buf = new Float32Array(an.fftSize);
+    an.getFloatTimeDomainData(buf);
+    let peak = 0;
+    for (let i = 0; i < buf.length; i++) { const v = Math.abs(buf[i]); if (v > peak) peak = v; }
+    if (peak > 1e-4) { this.silentReads = 0; return; }   // sound is flowing
+    if (++this.silentReads < 3) { this.checkT = 1.2; return; }
+
+    console.log('[music] the graph came back silent (file:// in Chrome) — ' +
+                'playing the track directly instead.');
+    this.routed = false;
+    try { this.mGain.disconnect(); } catch (e) {}
+    try { this.mNode.disconnect(); } catch (e) {}
+    const at = el.currentTime;
+    el.pause();
+    const el2 = this.mEl = new Audio();
+    el2.loop = el.loop; el2.preload = 'auto'; el2.volume = 0;
+    el2.addEventListener('error', () => this.musicFailed());
+    el2.addEventListener('loadedmetadata', () => { try { el2.currentTime = at; } catch (e) {} }, { once: true });
+    el2.src = el.src;
+    const p = el2.play();
+    if (p && p.catch) p.catch(() => {});
+    this.fadeEl(this.musicVol(), 900);
+  },
+
+  enable() {
+    this.boot();
+    if (!this.ac) return;
+    if (this.ac.state === 'suspended') this.ac.resume();
+    this.on = true;
+    this.master.gain.cancelScheduledValues(this.ac.currentTime);
+    this.master.gain.setTargetAtTime(0.5, this.ac.currentTime, 1.4);
+    this.playMusic();
+    document.getElementById('soundBtn').classList.remove('off');
+  },
+  disable() {
+    if (!this.ac) return;
+    this.on = false;
+    this.master.gain.setTargetAtTime(0.0001, this.ac.currentTime, 0.5);
+    if (this.musicOn && this.mEl) {
+      if (this.routed) setTimeout(() => { if (!this.on && this.mEl) this.mEl.pause(); }, 700);
+      else this.fadeEl(0, 500, () => { if (!this.on && this.mEl) this.mEl.pause(); });
+    }
+    document.getElementById('soundBtn').classList.add('off');
+  },
+  toggle() { this.on ? this.disable() : this.enable(); },
+
+  update(dt) {
+    if (!this.on || !this.ac) return;
+    /* the water gets darker as you go down */
+    const k = clamp(1 - World.depth / MAX_DEPTH, 0, 1);
+    this.droneFilter.frequency.setTargetAtTime(150 + k * k * 780, this.ac.currentTime, 0.6);
+
+    /* the track sinks with you */
+    if (this.musicOn && this.routed && this.mFilter && (CFG.music || {}).muffle !== false)
+      this.mFilter.frequency.setTargetAtTime(2400 + k * 15000, this.ac.currentTime, 0.7);
+
+    if (this.musicOn && this.routed && this.checkT > 0) {
+      this.checkT -= dt;
+      if (this.checkT <= 0) this.verifyMusic();
+    }
+
+    if (!this.fxOK()) return;
+    /* whale song, once you're deep enough */
+    this.whaleT -= dt;
+    if (this.whaleT <= 0) {
+      this.whaleT = rand(34, 15);
+      if (World.depth > 700 && World.depth < 3300) this.song();
+    }
+    this.bubbleT -= dt;
+    if (this.bubbleT <= 0) {
+      this.bubbleT = rand(2.6, .7);
+      if (World.depth < 220) this.bubble();
+    }
+  },
+
+  env(node, t0, a, d, peak) {
+    const g = this.ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+    node.connect(g);
+    g.connect(this.master); g.connect(this.verb);
+    return g;
+  },
+
+  ping() {
+    if (!this.on || !this.ac || !this.fxOK()) return;
+    const t = this.ac.currentTime, o = this.ac.createOscillator();
+    o.type = 'sine'; o.frequency.setValueAtTime(1180, t);
+    o.frequency.exponentialRampToValueAtTime(720, t + .5);
+    this.env(o, t, .006, 1.5, 0.14);
+    o.start(t); o.stop(t + 1.7);
+  },
+  chime() {
+    if (!this.on || !this.ac || !this.fxOK()) return;
+    const t = this.ac.currentTime;
+    const notes = [329.6, 392, 493.9, 587.3];
+    const f = notes[Math.floor(Math.random() * notes.length)];
+    [1, 2.01].forEach((mul, i) => {
+      const o = this.ac.createOscillator();
+      o.type = 'sine'; o.frequency.value = f * mul;
+      this.env(o, t, .01, 3.4 - i, 0.09 / (i + 1));
+      o.start(t); o.stop(t + 4);
+    });
+  },
+  song() {
+    const t = this.ac.currentTime;
+    const o = this.ac.createOscillator();
+    o.type = 'sine';
+    const f0 = rand(210, 120);
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f0 * rand(2.4, 1.4), t + 1.4);
+    o.frequency.exponentialRampToValueAtTime(f0 * .7, t + 3.6);
+    const vib = this.ac.createOscillator(); vib.frequency.value = 5.5;
+    const vg = this.ac.createGain(); vg.gain.value = 5;
+    vib.connect(vg); vg.connect(o.frequency); vib.start(t); vib.stop(t + 4);
+    this.env(o, t, .5, 3.4, 0.10);
+    o.start(t); o.stop(t + 4.2);
+  },
+  bubble() {
+    const t = this.ac.currentTime;
+    const o = this.ac.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(rand(700, 380), t);
+    o.frequency.exponentialRampToValueAtTime(rand(1500, 900), t + .09);
+    this.env(o, t, .004, .12, 0.05);
+    o.start(t); o.stop(t + .2);
+  },
+  arrive() {
+    if (!this.on || !this.ac || !this.fxOK()) return;
+    const t = this.ac.currentTime;
+    [130.8, 196, 261.6, 329.6, 392].forEach((f, i) => {
+      const o = this.ac.createOscillator();
+      o.type = 'sine'; o.frequency.value = f;
+      this.env(o, t + i * .5, .8, 6, 0.075);
+      o.start(t + i * .5); o.stop(t + i * .5 + 7);
+    });
+  }
+};
+
+/* ---------------------------------------------------------------- */
+/* boot                                                             */
+/* ---------------------------------------------------------------- */
+function toggleFS() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  else document.exitFullscreen && document.exitFullscreen();
+}
+document.getElementById('fsBtn').addEventListener('click', toggleFS);
+document.getElementById('soundBtn').addEventListener('click', () => Sound.toggle());
+
+document.getElementById('diveBtn').addEventListener('click', () => {
+  document.getElementById('gate').classList.add('gone');
+  Sound.enable();
+  World.started = true;
+  setTimeout(() => UI.showTip(coarse ? 'Drag up to sink faster · touch the water' : 'Scroll to sink faster · move your hand through the water', 7), 1600);
+});
+
+UI.init();
+resize();
+P.x = W / 2; P.y = H / 2; P.sx = W / 2; P.sy = H / 2;
+
+let last = performance.now();
+function frame(now) {
+  const dt = clamp((now - last) / 1000, 0, 0.05);   // never negative, never a huge jump
+  last = now;
+  World.update(dt);
+  World.draw(dt);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+document.addEventListener('visibilitychange', () => { last = performance.now(); });
+</script>
+</body>
+</html>
